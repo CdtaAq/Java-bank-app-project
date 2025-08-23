@@ -1,7 +1,6 @@
 // SAVE: banking-project/src/main/java/com/bank/controller/UserController.java
 package com.bank.controller;
 
-import com.bank.entity.Role;
 import com.bank.entity.User;
 import com.bank.service.RoleService;
 import com.bank.service.UserService;
@@ -54,7 +53,14 @@ public class UserController {
     @PostMapping
     public String create(@ModelAttribute("user") @Valid User user,
                          BindingResult result,
+                         @RequestParam(value = "roles", required = false) Long[] roleIds,
                          Model model) {
+        user.setRoles(new LinkedHashSet<>());
+        if (roleIds != null) {
+            for (Long rid : roleIds) {
+                roleService.findById(rid).ifPresent(user.getRoles()::add);
+            }
+        }
         if (result.hasErrors()) {
             loadLists(model, 0, 10);
             return "userForm";
@@ -70,10 +76,8 @@ public class UserController {
                        Model model) {
         User existing = userService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
-        // do not send existing password to UI
         existing.setPassword("");
         existing.setConfirmPassword("");
-        // ensure roles is modifiable set for JSP binding safety
         existing.setRoles(new LinkedHashSet<>(existing.getRoles()));
         model.addAttribute("user", existing);
         loadLists(model, page, size);
@@ -84,8 +88,15 @@ public class UserController {
     public String update(@PathVariable Long id,
                          @ModelAttribute("user") @Valid User user,
                          BindingResult result,
+                         @RequestParam(value = "roles", required = false) Long[] roleIds,
                          Model model) {
-        user.setId(id); // ensure validator knows it's an update
+        user.setId(id);
+        user.setRoles(new LinkedHashSet<>());
+        if (roleIds != null) {
+            for (Long rid : roleIds) {
+                roleService.findById(rid).ifPresent(user.getRoles()::add);
+            }
+        }
         if (result.hasErrors()) {
             loadLists(model, 0, 10);
             return "userForm";
