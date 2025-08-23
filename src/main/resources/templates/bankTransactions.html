@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bank Transactions</title>
+</head>
+<body>
+    <h1>Bank Transactions</h1>
+
+    <form action="/transactions" method="post">
+        <label>From Account:</label>
+        <input type="number" name="bankTransactionFromAccount"><br>
+
+        <label>To Account:</label>
+        <input type="number" name="bankTransactionToAccount"><br>
+
+        <label>Amount:</label>
+        <input type="number" step="0.01" name="bankTransactionAmount"><br>
+
+        <label>Type:</label>
+        <select name="bankTransactionType">
+            <option value="Deposit">Deposit</option>
+            <option value="Withdrawal">Withdrawal</option>
+            <option value="Transfer">Transfer</option>
+        </select><br>
+
+        <button type="submit">Submit Transaction</button>
+    </form>
+
+    <h2>Transaction List</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Amount</th>
+            <th>Type</th>
+        </tr>
+        <tr th:each="txn : ${transactions}">
+            <td th:text="${txn.bankTransactionId}"></td>
+            <td th:text="${txn.bankTransactionFromAccount}"></td>
+            <td th:text="${txn.bankTransactionToAccount}"></td>
+            <td th:text="${txn.bankTransactionAmount}"></td>
+            <td th:text="${txn.bankTransactionType}"></td>
+        </tr>
+    </table>
+</body>
+</html>
