@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Branch Management</title>
+</head>
+<body>
+    <h1>Branches</h1>
+
+    <form action="/branches" method="post">
+        <label>Branch Name:</label>
+        <input type="text" name="branchName"><br>
+
+        <label>Location:</label>
+        <input type="text" name="branchLocation"><br>
+
+        <label>Branch Code:</label>
+        <input type="text" name="branchCode"><br>
+
+        <button type="submit">Add Branch</button>
+    </form>
+
+    <h2>Branch List</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Code</th>
+        </tr>
+        <tr th:each="branch : ${branches}">
+            <td th:text="${branch.branchId}"></td>
+            <td th:text="${branch.branchName}"></td>
+            <td th:text="${branch.branchLocation}"></td>
+            <td th:text="${branch.branchCode}"></td>
+        </tr>
+    </table>
+</body>
+</html>
