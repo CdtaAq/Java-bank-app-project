@@ -1,72 +1,50 @@
-// SAVE: banking-project/src/main/java/com/bank/entity/User.java
-package com.bank.entity;
+// SAVE: banking-project/src/main/java/com/bank/config/SecurityConfig.java
+package com.bank.config;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+@Configuration
+public class SecurityConfig {
 
-@Entity
-@Table(name = "users",
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_user_username", columnNames = "username"),
-           @UniqueConstraint(name = "uk_user_email", columnNames = "email")
-       })
-public class User {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+          .authorizeHttpRequests(req -> req
+              .requestMatchers("/css/**","/js/**","/images/**","/","/h2/**").permitAll()
+              .anyRequest().authenticated()
+          )
+          .formLogin(Customizer.withDefaults())
+          .logout(l -> l.logoutSuccessUrl("/").permitAll());
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        // H2 console frames / CSRF relax for H2
+        http.headers(h -> h.frameOptions(f -> f.disable()));
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2/**"));
 
-    @NotBlank @Size(min=3, max=32)
-    @Column(nullable = false, length = 32)
-    private String username;
+        return http.build();
+    }
 
-    @NotBlank @Email @Size(max=128)
-    @Column(nullable = false, length = 128)
-    private String email;
+    // Demo users (noop for these only)
+    @Bean
+    public UserDetailsService users() {
+        return new InMemoryUserDetailsManager(
+            User.withUsername("admin").password("{noop}admin").roles("ADMIN").build(),
+            User.withUsername("manager").password("{noop}manager").roles("MANAGER").build(),
+            User.withUsername("user").password("{noop}user").roles("USER").build()
+        );
+    }
 
-    @NotBlank
-    @Column(nullable = false)
-    private String password; // stored as encoded
-
-    private boolean enabled = true;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name="user_id"),
-        inverseJoinColumns = @JoinColumn(name="role_id")
-    )
-    private Set<Role> roles = new LinkedHashSet<>();
-
-    // Transient helper for validation in forms
-    @Transient
-    private String confirmPassword;
-
-    public User() {}
-
-    // getters/setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username != null ? username.trim() : null; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email != null ? email.trim() : null; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
-
-    public Set<Role> getRoles() { return roles; }
-    public void setRoles(Set<Role> roles) { this.roles = roles; }
-
-    public String getConfirmPassword() { return confirmPassword; }
-    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
+    // To encode DB-backed users' passwords
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
