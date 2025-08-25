@@ -1,24 +1,34 @@
+
 package com.bank.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(
+    name = "branches",
+    uniqueConstraints = @UniqueConstraint(name = "uk_branch_code", columnNames = "branchCode")
+)
+@Getter @Setter @NoArgsConstructor
 public class Branch {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long branchId;
 
-    @Column(nullable = false, unique = true)
+    @NotBlank
+    @Size(min = 3, max = 16)
+    @Column(nullable = false, length = 16)
     private String branchCode;
 
-    @Column(nullable = false)
+    @NotBlank
+    @Size(min = 3, max = 64)
+    @Column(nullable = false, length = 64)
     private String branchName;
 
+    @Size(max = 255)
     private String branchAddress;
 }
