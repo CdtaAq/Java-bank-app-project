@@ -1,14 +1,14 @@
 package com.bank.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Employee {
 
     @Id
@@ -18,8 +18,13 @@ public class Employee {
     private String firstName;
     private String lastName;
     private String email;
+    private String phone;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
-    private Role role; // each employee has one role
+    private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 }
