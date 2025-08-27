@@ -1,20 +1,15 @@
-// SAVE: banking-project/src/main/java/com/bank/controller/UserController.java
 package com.bank.controller;
 
+import com.bank.entity.Role;
 import com.bank.entity.User;
 import com.bank.service.RoleService;
 import com.bank.service.UserService;
-import com.bank.validator.UserValidator;
-import jakarta.validation.Valid;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashSet;
+import java.util.*;
 
 @Controller
 @RequestMapping("/users")
@@ -22,92 +17,87 @@ public class UserController {
 
     private final UserService userService;
     private final RoleService roleService;
-    private final UserValidator userValidator;
-
-    public UserController(UserService userService, RoleService roleService, UserValidator userValidator) {
-        this.userService = userService;
-        this.roleService = roleService;
-        this.userValidator = userValidator;
+    public UserController(UserService userService, RoleService roleService) {
+        this.userService = userService; this.roleService = roleService;
     }
 
-    @InitBinder("user")
-    protected void initBinder(WebDataBinder binder) {
-        binder.addValidators(userValidator);
+    // Admin can see list; non-admin is blocked by SecurityConfig
+    @GetMapping("/list")
+    public String list(Model model) {
+        model.addAttribute("users", userService.findAll());
+        return "userList";
     }
 
-    private void loadLists(Model model, int page, int size) {
-        model.addAttribute("roles", roleService.findAll());
-        model.addAttribute("page",
-            userService.page(PageRequest.of(page, size, Sort.by("username").ascending())));
+    // Shared: Admin sees full blank form; non-admin sees only self (read/edit own basic fields)
+    @GetMapping("/form")
+    public String form(Authentication auth, Model model) {
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            model.addAttribute("user", new User());
+            model.addAttribute("allRoles", roleService.findAll());
+        } else {
+            User me = userService.findByUsername(auth.getName()).orElseThrow();
+            model.addAttribute("user", me);
+            // roles list only for display; non-admin cannot change roles
+            model.addAttribute("allRoles", Collections.emptyList());
+        }
+        return "userForm";
     }
 
-    @GetMapping
-    public String userForm(@RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "10") int size,
-                           Model model) {
+    @PostMapping("/save")
+    public String save(@ModelAttribute("user") User incoming, Authentication auth) {
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            // Non-admin can only update their own basic fields; ignore roles changes
+            User me = userService.findByUsername(auth.getName()).orElseThrow();
+            me.setFirstName(incoming.getFirstName());
+            me.setLastName(incoming.getLastName());
+            me.setEmail(incoming.getEmail());
+            if (incoming.getPassword() != null && !incoming.getPassword().isBlank()) {
+                me.setPassword(incoming.getPassword());
+            }
+            userService.save(me);
+            return "redirect:/users/form";
+        }
+
+        // Admin path: can create/update any user and assign roles
+        // If roles were sent as role IDs, ensure binding; otherwise default ROLE_USER enforced in service.
+        userService.save(incoming);
+        return "redirect:/users/list";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Long id, Authentication auth, Model model) {
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        User target = userService.findById(id).orElseThrow();
+
+        if (!isAdmin && !auth.getName().equalsIgnoreCase(target.getUsername())) {
+            // non-admin cannot edit others
+            return "redirect:/users/form";
+        }
+
+        model.addAttribute("user", target);
+        model.addAttribute("allRoles", isAdmin ? roleService.findAll() : Collections.emptyList());
+        return "userForm";
+    }
+
+    // Admin only (also secured in SecurityConfig)
+    @GetMapping("/new")
+    public String newUser(Model model) {
         model.addAttribute("user", new User());
-        loadLists(model, page, size);
+        model.addAttribute("allRoles", roleService.findAll());
         return "userForm";
     }
 
-    @PostMapping
-    public String create(@ModelAttribute("user") @Valid User user,
-                         BindingResult result,
-                         @RequestParam(value = "roles", required = false) Long[] roleIds,
-                         Model model) {
-        user.setRoles(new LinkedHashSet<>());
-        if (roleIds != null) {
-            for (Long rid : roleIds) {
-                roleService.findById(rid).ifPresent(user.getRoles()::add);
-            }
-        }
-        if (result.hasErrors()) {
-            loadLists(model, 0, 10);
-            return "userForm";
-        }
-        userService.create(user);
-        return "redirect:/users";
-    }
-
-    @GetMapping("/{id}/edit")
-    public String edit(@PathVariable Long id,
-                       @RequestParam(defaultValue = "0") int page,
-                       @RequestParam(defaultValue = "10") int size,
-                       Model model) {
-        User existing = userService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
-        existing.setPassword("");
-        existing.setConfirmPassword("");
-        existing.setRoles(new LinkedHashSet<>(existing.getRoles()));
-        model.addAttribute("user", existing);
-        loadLists(model, page, size);
-        return "userForm";
-    }
-
-    @PostMapping("/{id}")
-    public String update(@PathVariable Long id,
-                         @ModelAttribute("user") @Valid User user,
-                         BindingResult result,
-                         @RequestParam(value = "roles", required = false) Long[] roleIds,
-                         Model model) {
-        user.setId(id);
-        user.setRoles(new LinkedHashSet<>());
-        if (roleIds != null) {
-            for (Long rid : roleIds) {
-                roleService.findById(rid).ifPresent(user.getRoles()::add);
-            }
-        }
-        if (result.hasErrors()) {
-            loadLists(model, 0, 10);
-            return "userForm";
-        }
-        userService.update(id, user);
-        return "redirect:/users";
-    }
-
-    @PostMapping("/{id}/delete")
+    @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
         userService.deleteById(id);
-        return "redirect:/users";
+        return "redirect:/users/list";
     }
 }
