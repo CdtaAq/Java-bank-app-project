@@ -89,3 +89,20 @@
     </plugins>
   </build>
 </project>
+
+<!-- Add/ensure these deps exist -->
+<dependencies>
+  <!-- ... existing deps ... -->
+
+  <!-- Spring Security -->
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+  </dependency>
+
+  <!-- Security JSP taglibs -->
+  <dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-taglibs</artifactId>
+  </dependency>
+</dependencies>
