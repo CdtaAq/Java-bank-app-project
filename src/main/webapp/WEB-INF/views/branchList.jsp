@@ -1,35 +1,25 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
-<head>
-    <title>Branch List</title>
-</head>
+<head><title>Branches</title></head>
 <body>
-    <h2>All Branches</h2>
-
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Branch Code</th>
-            <th>Branch Name</th>
-            <th>Branch Address</th>
-            <th>Actions</th>
-        </tr>
-        <c:forEach var="branch" items="${branches}">
-            <tr>
-                <td>${branch.branchId}</td>
-                <td>${branch.branchCode}</td>
-                <td>${branch.branchName}</td>
-                <td>${branch.branchAddress}</td>
-                <td>
-                    <a href="${pageContext.request.contextPath}/branches/edit/${branch.branchId}">Edit</a> |
-                    <a href="${pageContext.request.contextPath}/branches/delete/${branch.branchId}">Delete</a>
-                </td>
-            </tr>
-        </c:forEach>
-    </table>
-
-    <br>
-    <a href="${pageContext.request.contextPath}/branches/form">Add New Branch</a>
+<h2>Branches</h2>
+<table border="1">
+  <tr><th>ID</th><th>Code</th><th>Name</th><th>Address</th><th>Actions</th></tr>
+  <c:forEach var="b" items="${branches}">
+    <tr>
+      <td>${b.branchId}</td>
+      <td>${b.branchCode}</td>
+      <td>${b.branchName}</td>
+      <td>${b.branchAddress}</td>
+      <td>
+        <!-- Admin-only actions: rely on controller/security for enforcement; optionally hide with sec:authorize -->
+        <a href="${pageContext.request.contextPath}/branches/edit/${b.branchId}">Edit</a> |
+        <a href="${pageContext.request.contextPath}/branches/delete/${b.branchId}" onclick="return confirm('Delete branch?')">Delete</a>
+      </td>
+    </tr>
+  </c:forEach>
+</table>
+<p><a href="${pageContext.request.contextPath}/">Home</a></p>
 </body>
 </html>
