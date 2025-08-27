@@ -5,8 +5,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
+
     @GetMapping("/")
-    public String root() {
-        return "redirect:/roles/list";
+    public String home() {
+        return "home"; // home.jsp
     }
 }
