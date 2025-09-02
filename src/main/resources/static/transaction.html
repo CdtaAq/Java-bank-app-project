@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transactions</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Transaction List</h1>
+    <a href="/transactions/new">Create New Transaction</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>From Account</th>
+                <th>To Account</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Example static row, replace with dynamic rendering -->
+            <tr>
+                <td>1</td>
+                <td>123456</td>
+                <td>654321</td>
+                <td>500</td>
+                <td>2025-09-02T12:00</td>
+                <td>
+                    <a href="/transactions/edit/1">Edit</a> |
+                    <a href="/transactions/delete/1">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
