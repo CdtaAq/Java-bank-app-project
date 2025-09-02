@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Form</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Transaction Form</h1>
+    <form action="/transactions/save" method="post">
+        <input type="hidden" name="bankTransactionId" value="">
+
+        <label>From Account:</label>
+        <input type="text" name="bankTransactionFromAccount" required><br><br>
+
+        <label>To Account:</label>
+        <input type="text" name="bankTransactionToAccount" required><br><br>
+
+        <label>Amount:</label>
+        <input type="number" name="amount" required><br><br>
+
+        <button type="submit">Save Transaction</button>
+    </form>
+</body>
+</html>
