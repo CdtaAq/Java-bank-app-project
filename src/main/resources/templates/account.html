@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Accounts</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Account List</h1>
+    <a href="/accounts/new">Create New Account</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Account Number</th>
+                <th>Type</th>
+                <th>Balance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Example static row; will be replaced by server-side rendering -->
+            <tr>
+                <td>1</td>
+                <td>123456</td>
+                <td>Savings</td>
+                <td>5000</td>
+                <td>
+                    <a href="/accounts/edit/1">Edit</a> |
+                    <a href="/accounts/delete/1">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
