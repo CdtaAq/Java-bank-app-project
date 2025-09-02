@@ -16,60 +16,56 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    /**
-     * Show all accounts
-     */
+    //  Show all accounts
     @GetMapping
     public String listAccounts(Model model) {
         List<Account> accounts = accountService.getAllAccounts();
         model.addAttribute("accounts", accounts);
-        return "account-list";  // JSP/HTML page
+        return "account";  // -> account.html / account.jsp
     }
 
-    /**
-     * Show account creation form
-     */
-    @GetMapping("/create")
+    //  Show account creation form
+    @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("account", new Account());
-        return "account-form";  // JSP/HTML page
+        return "accountForm";  // -> accountForm.html
     }
 
-    /**
-     * Handle account creation
-     */
-    @PostMapping("/save")
+    //  Save new account
+    @PostMapping
     public String saveAccount(@ModelAttribute("account") Account account) {
         accountService.saveAccount(account);
         return "redirect:/accounts";
     }
 
-    /**
-     * Show edit form
-     */
+    //  Show update form
     @GetMapping("/edit/{id}")
-    public String editAccount(@PathVariable("id") Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model) {
         Account account = accountService.getAccountById(id);
         model.addAttribute("account", account);
-        return "account-form";
+        return "accountForm";  // Reuse form for editing
     }
 
-    /**
-     * Delete an account
-     */
+    //  Update account
+    @PostMapping("/update/{id}")
+    public String updateAccount(@PathVariable Long id,
+                                @ModelAttribute("account") Account updatedAccount) {
+        accountService.updateAccount(id, updatedAccount);
+        return "redirect:/accounts";
+    }
+
+    //  Delete account
     @GetMapping("/delete/{id}")
-    public String deleteAccount(@PathVariable("id") Long id) {
+    public String deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);
         return "redirect:/accounts";
     }
 
-    /**
-     * Show account details
-     */
+    //  View single account details
     @GetMapping("/{id}")
-    public String viewAccount(@PathVariable("id") Long id, Model model) {
+    public String viewAccount(@PathVariable Long id, Model model) {
         Account account = accountService.getAccountById(id);
         model.addAttribute("account", account);
-        return "account-details";  // JSP/HTML page
+        return "accountDetails";  // -> accountDetails.html
     }
 }
