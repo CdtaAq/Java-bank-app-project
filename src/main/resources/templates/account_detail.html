@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Details</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <h1>Account Details</h1>
+    
+    <table>
+        <tr>
+            <th>ID</th>
+            <td th:text="${account.id}"></td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td th:text="${account.name}"></td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td th:text="${account.email}"></td>
+        </tr>
+        <tr>
+            <th>Balance</th>
+            <td th:text="${account.balance}"></td>
+        </tr>
+    </table>
+    
+    <div>
+        <a th:href="@{/accounts}">Back to Accounts</a>
+        <a th:href="@{'/accounts/edit/' + ${account.id}}">Edit</a>
+        <a th:href="@{'/accounts/delete/' + ${account.id}}" onclick="return confirm('Are you sure?')">Delete</a>
+    </div>
+</body>
+</html>
