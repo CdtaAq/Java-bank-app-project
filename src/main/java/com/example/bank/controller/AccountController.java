@@ -1,13 +1,11 @@
-package com.bank.controller;
+package com.example.demo.controller;
 
-import com.bank.model.Account;
-import com.bank.service.AccountService;
+import com.example.demo.model.Account;
+import com.example.demo.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/accounts")
@@ -16,29 +14,28 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    // Show all accounts
+    // 1. List all accounts
     @GetMapping
     public String listAccounts(Model model) {
-        List<Account> accounts = accountService.getAllAccounts();
-        model.addAttribute("accounts", accounts);
-        return "account"; // maps to account.html / account.jsp
+        model.addAttribute("accounts", accountService.getAllAccounts());
+        return "accounts_list";
     }
 
-    // Show create form
+    // 2. Show form to create new account
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("account", new Account());
-        return "account_form"; // separate form view
+        return "account_form";
     }
 
-    // Save new account
-    @PostMapping
-    public String createAccount(@ModelAttribute("account") Account account) {
-        accountService.createAccount(account);
+    // 3. Save new account
+    @PostMapping("/save")
+    public String saveAccount(@ModelAttribute("account") Account account) {
+        accountService.saveAccount(account);
         return "redirect:/accounts";
     }
 
-    // Show edit form
+    // 4. Show form to edit existing account
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Long id, Model model) {
         Account account = accountService.getAccountById(id);
@@ -46,25 +43,25 @@ public class AccountController {
         return "account_form";
     }
 
-    // Update account
-    @PostMapping("/update/{id}")
-    public String updateAccount(@PathVariable("id") Long id, @ModelAttribute("account") Account account) {
-        accountService.updateAccount(id, account);
+    // 5. Update existing account
+    @PostMapping("/update")
+    public String updateAccount(@ModelAttribute("account") Account account) {
+        accountService.updateAccount(account);
         return "redirect:/accounts";
     }
 
-    // Delete account
-    @GetMapping("/delete/{id}")
-    public String deleteAccount(@PathVariable("id") Long id) {
-        accountService.deleteAccount(id);
-        return "redirect:/accounts";
-    }
-
-    // View account details
+    // 6. View account details
     @GetMapping("/{id}")
     public String viewAccount(@PathVariable("id") Long id, Model model) {
         Account account = accountService.getAccountById(id);
         model.addAttribute("account", account);
-        return "account_detail"; // detailed account page
+        return "account_detail";
+    }
+
+    // 7. Delete account
+    @GetMapping("/delete/{id}")
+    public String deleteAccount(@PathVariable("id") Long id) {
+        accountService.deleteAccount(id);
+        return "redirect:/accounts";
     }
 }
